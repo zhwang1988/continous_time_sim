@@ -1,0 +1,81 @@
+package testjava;
+import testjava.GenerateMap;
+import testjava.SimPerson;
+import testjava.Calrep;
+
+import java.util.ArrayList;
+
+
+public class runmap {
+	     
+	public static void main(String[] args) {
+		 
+		int fp=77; //火灾地点
+		GenerateMap gp=new GenerateMap();
+		Integer[][] dist0 =gp.gemap();
+		Integer[][] maxpeople=gp.maxcp(8,15);//得到路的宽度
+		Integer[][] dist=gp.changemap(dist0,fp);//地图信息初始化
+		GenerateMap gp2=new GenerateMap();
+		Integer[][] dist1=gp2.changemap(dist0,fp);//地图信息初始化
+		gp.Initpeople(fp); //人员初始化
+		ArrayList<Integer[][]> list=gp.Fmap(dist); //计算最短路径信息，改变了dist
+		//gp.GetInformation(list,dist1,fp); //计算人，车路径时间，重叠时间
+//重新	   
+	   
+	   System.out.println("\n ----------------------------- \n");	
+	   ArrayList<SimPerson> allPerson=new ArrayList<SimPerson>();
+	   int count=gp.peoplelocation.length;
+	   //int count=1;
+	   Integer[] state=new Integer[count];
+	   for (int i=0;i<count;i++){
+		   int end;
+		   SimPerson one=new SimPerson(gp.peoplenumber[i],gp.peoplelocation[i]);
+		   allPerson.add(one);
+		   end=gp.getescapepoint(list, gp.peoplelocation[i], 41, 5);
+		   state[i]=1;//仿真未结束
+		   allPerson.get(i).initSimPerson(list, end);
+		  
+		   
+	   }
+
+	   while (runmap.isRunning(state)){
+		   //在此处需要得到一个初始的
+		   for (int i=0;i<count;i++){
+			   //得到每个人的路径
+			   //修正路径
+			   Integer[] chain;
+			   chain=gp.display_path_s2d(list, gp.peoplelocation[i], 41,5);//每个人的都可以得到
+			   //根据外面的参数来修改这个chain
+			   if(state[i]==1){
+				   	state[i]=allPerson.get(i).simnextstep(list,chain);
+				  
+			   }
+		   }
+		   
+		   
+		  // 得到新的问题
+			//计算最短路径信息，改变了dist
+           //下一个路径，假设人的速度也不一样了，所以说时间也不一样了，如何判断下面的点有可能会重复？
+		   //先算出来最短路径，那么下5秒8-12，那么速度就是1.6-2.4
+			//需要一个函数计算下，下面他们通过这些路口的时间点，是怎么样的，假设速度是2秒，那么计算出未来重复的路径是哪些
+			
+			//记录重复的人和路径，所有后面到的人换路径，最大人数，存储的是后到的
+			
+
+			
+				   
+		   System.out.print("\n  ----");	
+	   }	
+	}
+	
+	
+
+	public static boolean isRunning(Integer[] state){
+		int length=state.length;
+		for(int i=0;i<length;i++){
+			if (state[i]==1)
+				return true;
+		}
+		return false;
+	}
+}

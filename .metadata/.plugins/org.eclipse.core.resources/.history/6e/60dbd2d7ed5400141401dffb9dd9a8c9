@@ -1,0 +1,11 @@
+package SCMAgent;
+
+public interface LogisticAgents {
+	//the property of the interface is static and public
+	public static int agenttype=1;
+	
+	public double emissionFunction(double oilamount);
+	
+	
+	
+}

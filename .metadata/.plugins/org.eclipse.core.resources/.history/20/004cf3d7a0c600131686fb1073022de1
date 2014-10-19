@@ -1,0 +1,13 @@
+package testjava;
+
+import javax.swing.JOptionPane;
+
+public class InputGUI {
+	public static void main(String args[]) {
+    int a = 0;
+    int b=1;
+    a -=b;
+    System.out.print(a);
+		
+	}
+}

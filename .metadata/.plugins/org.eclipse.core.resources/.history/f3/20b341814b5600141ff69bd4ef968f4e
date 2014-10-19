@@ -1,0 +1,25 @@
+package FPtree;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
+
+public class ReadFile {
+	
+public static String readFile(String fileName, String encode){
+	File file=new File(fileName); 
+	try {
+			FileInputStream inStream=new FileInputStream(file);
+			InputStreamReader stremr=new InputStreamReader(inStream, encode);
+			BufferedReader reader=new BufferedReader(stremr);	
+		
+	} catch (Exception e) {	
+		e.printStackTrace();
+	}
+	return null;
+}
+	
+
+}

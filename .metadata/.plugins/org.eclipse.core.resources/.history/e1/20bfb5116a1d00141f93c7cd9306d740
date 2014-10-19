@@ -1,0 +1,97 @@
+package SCMAgent;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Date;
+
+
+public class Customer extends SCMElements {
+	//客户的订货，应该是分散订货的策略，不会随机发送再比较价格，不然太复杂，如果分销中心都要询价，比较价格的话。
+	//先不做比较机制，确定数据结构
+	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");//时间的格式
+	
+	
+	
+	ArrayList<Product> Demands;
+	//对于客户来说是否添加时间呢？
+	private String name;
+	ArrayList<SCMElements> ConnectedDistributors;//下游可以连接的一部分分销商
+	Map<Product,Date> SendProductOrderss=new HashMap<Product,Date>(); //在内存中随意生成一部分
+	ArrayList<Message> SendOrders;
+	
+	
+	////initialize 
+	//客户订的买的价格了
+	private double dieselprice1;
+	private double dieselprice0;
+	private double gasolineprice97;
+	private double gasolineprice93;
+	
+	
+	public Customer(){}
+	//在构造函数当中给出products,需求指令,从数据库当中陪并且读取
+	
+	public Customer(String name, ArrayList<Product> products){
+	//构造函数可以生成所需要的物料
+		this.name=name;
+	    this.Demands=products;
+	}
+	
+	public void initializedemand(){
+		double amount;
+		//从这里认为，如果不是从数据库当中读取，那么就认为random
+		amount=Randomdemand(100,500);
+		Product d0=new Product("0号柴油",amount,dieselprice0,0,1);
+		Demands.add(d0);
+		amount=Randomdemand(100,500);
+		Product d1=new Product("1号柴油",amount,dieselprice1,1,1);
+		Demands.add(d1);
+		amount=Randomdemand(100,500);
+		Product p97=new Product("97号汽油",amount,gasolineprice97,97,2);
+		Demands.add(p97);
+		amount=Randomdemand(100,500);
+		Product p93=new Product("93号汽油",amount,gasolineprice93,93,2);
+		Demands.add(p93);	
+	}
+
+	//用于测试案例
+	public double Randomdemand(int mindemand, int maxdemand) { 
+		double amount;
+		amount=Math.random()*(maxdemand-mindemand)+mindemand;
+		return amount;
+	}
+	
+	public void report() {
+		// TODO Auto-generated method stub
+		//定义不同种类的物料
+	}
+	
+	public void generateDemands(){
+		//	用于生成客户的需求，面向所有的各个客户的需求，得到一张本客户的需求列表，包括分销商，量，时间，放在order里面
+		//	for example,否则还是从数据库读取JDBC，或者mybatis的数据，本身都是应该从数据库读取的
+		for(int i=0;i<ConnectedDistributors.size();i++){
+			//物料和相应的工厂都要和对应的数据结构想匹配起来
+		double amount=Randomdemand(100,500);
+		Product p97=new Product("97号汽油",amount,gasolineprice97,97,2);
+		Message ms=new Message();
+		Date dueDate=new Date();
+		try{
+			dueDate=format.parse("2014-08-05");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		SendProductOrderss.put(p97, dueDate); //得到了物料，接下来要选择合适的分销商进行发货,选择一批分销商
+		ms.setSourceNode(this);
+		ms.setTargetNode(ConnectedDistributors.get(i));
+		SendOrders.add(ms);
+		}					
+	}
+	
+	//再发送信息
+	public ArrayList<Message> sendMessageToDistributor(){
+		return this.SendOrders;
+	}
+
+}

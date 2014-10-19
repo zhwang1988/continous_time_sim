@@ -1,0 +1,471 @@
+package testjava;
+import java.util.*;
+
+public class GenerateMap {
+
+	private Integer[][] IniMap;
+	private int fp;
+	public static int M=Integer.MAX_VALUE;
+	
+	public static int MAXSUM(int a, int b){
+	return(a!=M&&b!=M)?(a+b):M;
+	}
+	Integer[] peoplelocation=new Integer[20];
+	Integer[] peoplenumber=new Integer[20];
+	Integer[] peopleend=new Integer[20];
+	private Integer[][][] Pathinfo1=new Integer[100][100][20];
+	private Integer[][][] Pathinfo2=new Integer[100][100][20];
+	private Integer[][][] Pathstarttime=new Integer[100][100][20];
+	private Integer[][][] Pathfinishtime=new Integer[100][100][20];
+	private Integer[][]   Pathcount=new Integer[100][100];
+	private Integer[][] path=new Integer[100][100];
+	ArrayList<StoreWp> stm=new ArrayList<StoreWp>();
+	
+	public ArrayList<Integer[][]> Fmap(Integer[][] dist){
+    int a=100;
+	
+    for(int i=0;i<a;i++){
+    	for(int j=0;j<a;j++){
+	     Pathcount[i][j]=0;
+    	}
+    }
+	for(int i=0;i<100;i++)
+		for(int j=0;j<100;j++)
+			for(int k=0;k<20;k++){
+				Pathstarttime[i][j][k]=0;
+				Pathfinishtime[i][j][k]=0;
+		}
+	
+	for(int i=0;i<a;i++){
+		for(int j=0; j<a;j++)
+			path[i][j]=i;
+	}
+	for(int k=0;k<a;k++){
+		for(int i=0;i<a;i++){
+			for(int j=0;j<a;j++){
+				if(dist[i][j]>MAXSUM(dist[i][k],dist[k][j])){
+					path[i][j]=path[k][j];//最后一个经过节点
+					dist[i][j]=MAXSUM(dist[i][k],dist[k][j]);
+				}
+		}
+	}	
+	
+	}
+	
+    ArrayList<Integer[][]> list=new ArrayList<Integer[][]>();
+    list.add(dist);
+    list.add(path);
+    return list;
+	}
+	
+	
+	
+    public Integer[][] gemap(){
+    	int  i,j,nv,ne,k;
+		System.out.printf("无向图的顶点数=100,边=180\n");
+		nv = 100;
+		ne = 180;
+		Integer data[][] = new Integer[nv][nv];
+		System.out.print(data.length+"\n");
+		for(i=0;i<data.length;i++)
+			for(j=0;j<data.length;j++)
+			{
+			     if (i == j)
+			        data[i][j] = 0;
+			        else {
+			         data[i][j] = M;
+			        }
+			}
+
+		for(i=0;i<=89;i++)	
+		{
+			j=i+10;
+			k=i+1;		
+			for(int m=1;m<=10;m++)
+			{
+				if(i==10*m-1)
+				{
+					data[i][i+1]=M;
+					data[i+1][i]=M;
+					break;
+				}
+				else
+				{	
+					int temprand=getrandom(5,15);
+					data[i][k]=temprand;
+					data[k][i]=temprand;
+				}
+			}
+			int temprand1=getrandom(5,15);
+			data[i][j]=temprand1;
+			data[j][i]=temprand1;
+		}
+		System.out.printf("无向带权图生成的邻接矩阵：");
+		for(i=0;i<data.length;i++)
+			for(j=0;j<data.length;j++)
+			{
+				 
+				if(data[i][j]==M)
+					System.out.print('M');
+				else
+				System.out.print(data[i][j]);
+				if(j==data.length-1)
+					System.out.print("\n");
+			}
+		return data;
+    }
+    public Integer[][] maxcp(int min, int max){
+    	int  i,j,nv,k;
+		nv = 100;
+		Integer data[][] = new Integer[nv][nv];
+		System.out.print(data.length+"\n");
+		for(i=0;i<data.length;i++)
+			for(j=0;j<data.length;j++)
+			{
+			     if (i == j)
+			        data[i][j] = 0;
+			        else {
+			         data[i][j] = M;
+			        }
+			}
+
+		for(i=0;i<=89;i++)	
+		{
+			j=i+10;
+			k=i+1;		
+			for(int m=1;m<=10;m++)
+			{
+				if(i==10*m-1)
+				{
+					data[i][i+1]=M;
+					data[i+1][i]=M;
+					break;
+				}
+				else
+				{	
+					int temprand=getrandom(min,max);
+					data[i][k]=temprand;
+					data[k][i]=temprand;
+				}
+			}
+			int temprand1=getrandom(min,max);
+			data[i][j]=temprand1;
+			data[j][i]=temprand1;
+		}
+		return data;
+    }
+    
+    
+    //把路径反过来逆向输出
+    public Integer[] reverse(Integer[] chain, int count){
+    	int temp;
+    	for(int i=0,j=count-1;i<j;i++,j--){
+    		temp=chain[i];
+    		chain[i]=chain[j];
+    		chain[j]=temp;
+    	}
+    	return chain;
+    }
+    
+    public void display_path(ArrayList<Integer[][]> list){
+    	Integer[][] dist=list.get(0);
+    	Integer[][] path=list.get(1);
+    	Integer[] chain=new Integer[dist.length];
+    	System.out.println("orgin->dist"+"dist"+"path");
+    	for(int i=0; i<dist.length;i++){
+    		for(int j=0; j<dist.length;j++){
+    			if(i!=j){
+    				System.out.print("\n   "+(i)+"->"+(j)+"   ");
+    				if(dist[i][j]==M){
+    					System.out.print(" NA ");
+    				}
+    				else{
+    					System.out.print(dist[i][j]+"      ");
+    					int count=0;
+    					int k=j;
+    					do{
+    						k=chain[count++]=path[i][k];
+    					}while(i!=k);
+    					chain=reverse(chain,count);
+    					System.out.print(chain[0]+"");
+    					for(k=1;k<count;k++){
+    						System.out.print("->"+chain[k]);
+    					}
+    					System.out.print("->"+j);
+    				}
+    				}
+    			}
+    		}
+    	}
+    
+    public int getescapepoint(ArrayList<Integer[][]> list, int start, int end1, int end2){
+	    int end;	
+	    Integer[][] dists2d=list.get(0);
+	    if(dists2d[start][end1]>dists2d[start][end2])
+    		end=end2;
+	    else
+	    	end=end1;
+    	return end;
+    }
+    
+    
+    
+    public Integer[] display_path_s2d(ArrayList<Integer[][]> list, int start, int end1, int end2){
+    	int end;
+    	Integer[][] dist=list.get(0);
+    	Integer[][] path=list.get(1);
+    	Integer[] chain=new Integer[dist.length];
+	    if(dist[start][end1]>dist[start][end2])
+    		end=end2;
+	    else
+	    	end=end1;
+    	System.out.print("\n   "+(start)+"->"+(end)+"   ");
+		if(dist[start][end]==M){
+			System.out.print(" NA ");
+		}
+		else{
+			System.out.print(dist[start][end]+"      ");
+			int count=0;
+			int k=end;
+			do{
+				k=chain[count++]=path[start][k];
+			}while(start!=k);
+			chain=reverse(chain,count);
+			chain[count]=end;
+			System.out.print(chain[0]+"");
+			for(k=1;k<count;k++){
+				System.out.print("->"+chain[k]);
+			}
+			System.out.print("->"+end);
+		}
+    	return chain;
+    }
+    
+    public Integer[] getchain(ArrayList<Integer[][]> list, int start, int end){
+    	return display_path_s2d( list,  start, end, end);
+    }
+    
+	public static int getrandom(int min, int max){
+	    Random random = new Random();
+	    int s = random.nextInt(max)%(max-min+1) + min;
+	    return s;
+		}
+	
+    public Integer[][] changemap(Integer[][]map, int fp){
+    Integer[][] map1=new Integer[100][100];
+       for(int i=0;i<10;i++){
+    	   if(fp==i*10&&i!=9){
+    		   map[fp][fp+1]=M;
+    	       map[fp][fp+10]=M;
+    	   }
+    	   else if(fp==90){
+    		   map[fp][fp+1]=M;
+    	   }
+    	   else if(fp==i*10+9&&i!=9){
+    		   map[fp][fp-1]=M;
+    	       map[fp][fp+10]=M;
+    	   }
+    	   else if(fp==99){
+    		   map[fp][fp-1]=M;
+    	   }
+    	   else if(fp<9&&fp>0){
+    		   map[fp][fp-1]=M;
+    	       map[fp][fp+1]=M;
+    	       map[fp][fp+10]=M;
+    	   }
+    	   else if(fp>90&&fp<99){
+    		   map[fp][fp-1]=M;
+    	       map[fp][fp+1]=M;
+    	       map[fp][fp-10]=M;
+    	   }
+    	   else if(fp>i*10&&fp<i*10+9&&i!=1&&i!=9){
+    		   map[fp][fp-1]=M;
+    	       map[fp][fp+1]=M;
+    	       map[fp][fp-10]=M; 
+    	       map[fp][fp+10]=M;
+    	   }
+       }
+       for(int i=0;i<100;i++){
+    	   for(int j=0;j<100;j++){
+    		   map1[i][j]=map[i][j];
+    	   }
+       }
+ 
+		return map1;
+    }
+    
+public void calpeople(){
+	System.out.println("\n");
+	System.out.println("calculate the repitition times with people");
+	System.out.println("\n");
+	ArrayList alist=new ArrayList<Integer[]>();
+	
+    for(int i=0;i<100;i++){
+    	for(int j=0;j<100;j++){
+    			for(int k=0;k<20;k++){
+    				Integer ik=k;
+    				Iterator p = alist.iterator();
+    				if(p.hasNext())
+    				    if(ik==p.next()){
+    				    	continue;
+    				    }
+    				if(Pathinfo1[i][j][k]!=null){
+                       int st1=Pathstarttime[i][j][k];
+                       int ft1=Pathfinishtime[i][j][k];
+                       boolean kk=false;
+	    			   for(int z=k+1;z<20&&z>k;z++){
+	    				  if(Pathinfo1[i][j][z]!=null){
+                          int st2=Pathstarttime[i][j][z];
+                          int ft2=Pathfinishtime[i][j][z];
+                          alist.add(z);
+                          if(Math.abs(st1-st2)<5&&Math.abs(ft1-ft2)<5){
+                        	  kk=true;
+                        	  System.out.println("There are "+Pathinfo1[i][j][z]+" people from "
+          		    				+Pathinfo2[i][j][z]+" through line "+i+" to "+j+" at the same time from time "
+                        			  +st2+" to time "+ft2);
+          		    				Pathcount[i][j]=Pathinfo1[i][j][z]+Pathcount[i][j];
+          		    				StoreWp chpline=new StoreWp(z,i,j); 
+          		    				stm.add(chpline);
+          		    				}
+                           }               	   
+	    			   }
+	    			   if(kk==true){
+	    			   System.out.println("There are "+Pathinfo1[i][j][k]+" people from "
+		    				       +Pathinfo2[i][j][k]+" through line "+i+" to "+j+" at the same time from time "
+                     			  +st1+" to time "+ft1);
+				    				Pathcount[i][j]=Pathinfo1[i][j][k]+Pathcount[i][j];
+				    				StoreWp chpline1=new StoreWp(k,i,j); 
+      		    				stm.add(chpline1);
+	    			   }
+	    			   if(Pathcount[i][j]!=0){
+    	                   System.out.println("total= "+Pathcount[i][j]);
+    	                   Pathcount[i][j]=0;
+	    			   }
+    				}
+    				
+    			}
+    			
+   		    	
+    	}
+               
+    }
+}
+
+public void Initpeople(int fp){
+	for(int i=0;i<20;i++){
+		int pa=getrandom(0,99);
+		int pn=getrandom(2,10);
+		while(pa==fp){
+			pa=getrandom(0,99);
+		}
+		peoplelocation[i]=pa;
+		if(i>0){
+			for(int k=0;k<i;k++){
+				while(peoplelocation[k]==peoplelocation[i]||peoplelocation[i]==fp){
+			     pa=getrandom(0,99);					
+			     peoplelocation[i]=pa;
+			}
+		}
+	}
+	peoplenumber[i]=pn;
+	}
+}
+
+
+
+
+public void GetInformation(ArrayList list, Integer[][] dist, int fp){
+	ArrayList Allpath=new ArrayList<Integer[]>();
+	ArrayList Firepath=new ArrayList<Integer[]>();
+	
+	for(int i=0;i<20;i++){
+		
+		System.out.println("\n There are "+peoplenumber[i]+" people from location "+peoplelocation[i]);	
+	Integer[] Pathroute=display_path_s2d(list,peoplelocation[i],41,5);
+	
+	int temp1=0;
+	int temp2=0;
+	for(int k=0;k<Pathroute.length;k++){
+        
+		if(Pathroute[k]!=null&&Pathroute[k+1]!=null){
+		int a=Pathroute[k];
+	    int b=Pathroute[k+1];
+  
+	    Pathinfo1[a][b][i]=peoplenumber[i];
+	    Pathinfo2[a][b][i]=peoplelocation[i];
+	  
+	    //假设移动速度是1
+	    if(k==0){
+	    	Pathstarttime[a][b][i]=0;
+	        Pathfinishtime[a][b][i]=dist[a][b]/1+Pathstarttime[a][b][i];
+	    }
+	    else{
+	    Pathstarttime[a][b][i]=temp1;
+	    Pathfinishtime[a][b][i]=dist[a][b]/1+Pathstarttime[a][b][i];
+	    }  
+	    temp1=Pathfinishtime[a][b][i];
+	    System.out.println("\n");
+		System.out.println(peoplenumber[i]+" people from "+peoplelocation[i]+" start "+Pathstarttime[a][b][i]
+				+" to "+Pathfinishtime[a][b][i]+" in line "+a+" to "+b);
+	    
+		}
+		else
+			break;
+    }
+	Allpath.add(Pathroute);
+	}
+	
+	System.out.println("\n");
+	System.out.println("below is the firecarpath");
+
+		Integer[] Pathroute1=display_path_s2d(list,32,fp,fp);
+		Firepath.add(Pathroute1);
+		Integer[] Pathroute2=display_path_s2d(list,0,fp,fp);
+		Firepath.add(Pathroute2);
+		Integer[] Pathroute3=display_path_s2d(list,92,fp,fp);
+		Firepath.add(Pathroute3);
+		Integer[] Pathroute4=display_path_s2d(list,98,fp,fp);
+		Firepath.add(Pathroute4);
+	
+}
+
+
+public Integer[][] changepath(Integer[][] omap,int ploc,int start, int end){
+    //改变omap的某一条路径，重新求
+	omap[start][end]=M;
+	return omap;	
+}
+
+
+
+
+}
+
+
+
+class StoreWp{
+	int st;
+	int ds;
+	int plabel;
+	
+	public StoreWp(int plabel, int st, int ds){
+		this.plabel=plabel;
+		this.st=st;
+		this.ds=ds;
+	}
+}
+
+		 
+		    //根据消防车路径和人跑动路径进行修正，将同一时间人数大于10的边，调整，调整某一个人多的组
+       //调整路径重新显示，dist[][]是原来的地图
+           
+
+	
+	
+	
+
+	
+
+	
+	
+

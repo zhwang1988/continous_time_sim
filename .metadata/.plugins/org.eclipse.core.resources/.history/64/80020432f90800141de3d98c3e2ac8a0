@@ -1,0 +1,22 @@
+
+public class Elements {
+	//define the basic operation
+	//所有的供应链主体公有的方法和属性是什么
+	private String type;
+	double priceout;
+	
+	public void purchase(){
+		
+	}
+	
+	public void sale(){
+		
+	}
+	
+	public void transfermode(){
+		
+	}
+	
+	
+
+}

@@ -1,0 +1,35 @@
+package FPtree;
+
+import java.util.List;
+
+public class FPNode {
+	String idName;
+	List<FPNode> children;
+	FPNode parent;
+	FPNode next; //same id 的节点，连接计数的作用
+	long count;
+	
+	public FPNode(){
+		this.idName=null;
+	}
+	
+	public FPNode(String name){
+		
+	}
+	
+	public void addChildren(FPNode child){
+		this.children.add(child);
+		
+	}
+	
+	public void addCount(int count){
+		this.count+=count;
+	}
+	
+	public void addCount(){
+		this.count+=1;
+	}
+	
+	
+
+}

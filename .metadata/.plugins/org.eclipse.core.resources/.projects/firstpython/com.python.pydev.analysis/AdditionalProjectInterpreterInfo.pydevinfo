@@ -1,0 +1,62 @@
+-- VERSION_4
+-- START DISKCACHE
+/Users/zhwang1988/Documents/workspace/.metadata/.plugins/org.eclipse.core.resources/.projects/firstpython/com.python.pydev.analysis/v2_indexcache
+hello.scrapy|1406705361000|/Users/zhwang1988/Documents/workspace/firstpython/hello/scrapy.py
+hello.craw|1406701946000|/Users/zhwang1988/Documents/workspace/firstpython/hello/craw.py
+hello.pythontest|1397708546000|/Users/zhwang1988/Documents/workspace/firstpython/hello/pythontest.py
+hello.__init__|1407233152000|/Users/zhwang1988/Documents/workspace/firstpython/hello/__init__.py
+-- END DISKCACHE
+-- START DICTIONARY
+9
+3=hello.scrapy
+5=Fetcher
+2=hello.craw
+8=ContentEncodingProcessor
+4=hello.pythontest
+1=hello.__init__
+9=Fetcher.__init__
+7=SiteCopyer.__init__
+6=SiteCopyer
+-- END DICTIONARY
+-- START TREE 1
+12
+a|1|a!11@
+con|1|ContentEncodingProcessor!17@
+def|1|deflate!18@
+fet|1|Fetcher!17@
+get|2|getImg!26@getHtml!26@
+htm|1|html!27@
+ins|1|insertion_sort!34@
+lab|1|labels!11@
+nam|1|name!11@
+peo|1|people!11@
+req|1|request!11@
+sit|1|SiteCopyer!17@
+-- END TREE
+-- START TREE 2
+24
+__d|1|__del__!5&18@
+__i|2|__init__!6&18@__init__!5&18@
+bas|1|baseurl!7&19@
+cop|1|copy!6&18@
+cre|1|create_dir!6&18@
+f|1|f!7&19@
+ful|1|full_link!6&18@
+get|1|get!5&18@
+hom|1|home!7&19@
+htt|2|http_request!8&18@http_response!8&18@
+lin|1|link_alias!6&18@
+loc|1|lock!9&19@
+ope|1|opener!9&19@
+pop|1|pop!5&18@
+pos|1|post!5&18@
+pro|1|proxyisworking!5&18@
+pus|1|push!5&18@
+q_a|1|q_ans!9&19@
+q_r|1|q_req!9&19@
+req|1|req!9&19@
+run|1|running!9&19@
+str|1|strip_link!6&18@
+tas|1|taskleft!5&18@
+thr|2|threadget!5&18@threads!9&19@
+-- END TREE

@@ -1,0 +1,259 @@
+package SCMAgent;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+public class Distributor extends SCMElements {
+	
+	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");//时间的格式
+	
+	private Date currentDate;//用于定期订货法的时间参数，外部应该有仿真时间，可以获得外部的仿真时间，当这个仿真时间的time 到了
+	 
+	
+	private static final double safecoeff = 0.3;  //安全库存和估计量的初始设定
+	private static final double maxcoeff = 0.8;   //最大库存量的设计
+
+	private ArrayList<Product> InventoryProducts;//库存商内部存在的库存和结构
+	
+	/*some information above will not be used here*/
+	
+	private int MaxCapProductType[];//用数组表示所有可能存放种类的最大值市场上有1-10种产品，0就表示不能存放该种物料,乙烯等
+	
+	private ArrayList<Message> DemandOrders;  //上游订单信息，有不同的客户，优先级呢？
+	private ArrayList<Message> PurchaseOrders; //下游的发送的货物
+	private ArrayList<Message> ConfirmOrders; //返回的确认的订单的信息
+	private Map<SCMElements,Integer> DemandPriority;// 上游的priority 主要指客户
+	private Map<SCMElements,Integer> PurchasePriority; //下游的购买的priority 正好把所有的连接关系保存起来
+
+	
+	private double dieselprice1;
+	private double dieselprice0;
+	private double gasolineprice97;
+	private double gasolineprice93;
+	
+	private double locx;  //分销商的位置中心
+	private double locy; 
+	
+	public Distributor(){
+		
+	}
+	//从数据库给出几个部分
+	public Distributor(ArrayList<Product> SaleProducts, int ProductType[]){
+		this.InventoryProducts=SaleProducts; //设定初始库存
+		this.MaxCapProductType=ProductType; //设定可以存放的最大量
+	}
+	
+	//分销商一开始需要估计下本期的库存，初始化库存，或者是上一周期的，或者进行核算，更应该是函数的外部给出的，不止这些
+	private void initializedata(){
+		//测试性质的初始化函数
+		double amountd0=getrandom(100,500);
+		Product d0=new Product("0号柴油",amountd0,dieselprice0,0,1);
+		InventoryProducts.add(d0);
+		
+		double amountd1=getrandom(100,500);
+		Product d1=new Product("1号柴油",amountd1,dieselprice1,1,1);
+		InventoryProducts.add(d1);
+		
+		double amountp97=getrandom(100,500);
+		Product p97=new Product("97号汽油",amountp97,gasolineprice97,97,2);
+		InventoryProducts.add(p97);
+		
+		double amountp93=getrandom(100,500);
+		Product p93=new Product("93号汽油",amountp93,gasolineprice93,93,2);
+		InventoryProducts.add(p93);
+		
+	}
+	
+	public void getMessageFromCustomer(Message e){
+		//放到相应地内容当中去,不如在这里就根据优先级来排序完毕最后获得各个的需求值
+		//按照优先级逐步获取上游的商品，并且按照优先级进行排序
+		int size=DemandOrders.size(); //定义大小
+		Message last=DemandOrders.get(size);
+		if(size==0)
+		DemandOrders.add(e);
+		else
+		{	
+		int lastp=DemandPriority.get(DemandOrders.get(size).getSourceNode());//最后一个的优先级
+		int newp=DemandPriority.get(e.getSourceNode());//得到的是当前的SCM的节点，我需要判断他的优先级
+		if(lastp<newp)
+		{	
+			DemandOrders.remove(size);
+			DemandOrders.add(e);
+			DemandOrders.add(last);
+		}	
+		else
+		DemandOrders.add(e);
+		}		
+	}
+	
+	public void getMessageFromPlants(Message e){
+		ConfirmOrders.add(e);	
+		//固定的本月的订单
+		/*分成若干个部分来进行
+		*有没有供应的优先级呢？固定供应量到月底，5000吨，进1000吨，出5000吨，一般分销中心的总物料总不能一直保持一个月的
+		*供应没有优先级目，还是应该分别计算*/		
+	}
+	
+	//预测到底是先到货还是先供货？
+	
+	
+	
+//在上游信息已知的情况下需要进行相应的规划,先根据上游的情况给出计划，下游本身是有供应的
+	public void planningFirstStage(){
+		/*根据库存，上一期的情况和下一期的，预期的客户的订货量，一般是实际的客户需求，产生向下游发送的信息
+		需要进一步的考虑优先级的问题，并且根据优先级来测试相关数据，看是否可行。
+		按照顺序，处理订货量，以及订货的时间，第一轮设定都可以满足需求，先把一些当前库存量可以满足的需求满足了，留下残余的
+		时间点又变成了调货，先不考虑时间，时间在logistic 运输考虑，先出货，后进货
+	    把库存不足的货物先完全补足	
+		供货有1一个月的周期呢？如果同一种物料我认为，到达时间是供货时间的前5天，我就把该货物的供货量加上去，如果不是那就先算了
+	    监测库存？
+        从处理客户优先级的订单开始*/
+		
+		for(int i=0;i<DemandOrders.size();i++){
+			//每一种物料
+			Iterator demanditerator=DemandOrders.get(i).getOrders().keySet().iterator();
+			//对改厂返回的物料的信息
+			Map<Material,Date> sendbackmaterial=new HashMap();
+			//Is this material in supply orders?
+			boolean flaginsupply=false;
+			
+			while(demanditerator.hasNext()){
+				Product ordermaterial=(Product)demanditerator.next();//获取键值Material，选择
+				Product product=InventoryProducts.get(InventoryProducts.indexOf((Product)ordermaterial)); //获取当前的所需物料,库存当中的物料
+				
+				for(int j=0;j<ConfirmOrders.size();j++){
+					/*confirmOrders may have different message e but with the same material
+					m from different plants*/
+					Iterator supplyiterator=ConfirmOrders.get(i).getOrders().keySet().iterator();
+					Product plantmaterial=(Product)supplyiterator.next();//获取工厂的键值键值Material，选择
+					flaginsupply=DemandOrders.get(i).getOrders().containsKey(plantmaterial);//demand又是否包含该键值
+					long aheaddays=0;
+				    //judge the time gap
+					
+					
+					if(flaginsupply){
+						try{
+						Date demanddate=DemandOrders.get(i).getOrders().get(ordermaterial);
+						Date supplydate=ConfirmOrders.get(j).getOrders().get(plantmaterial);
+						long diff=demanddate.getTime()-supplydate.getTime();
+						aheaddays=diff/(1000*60*60*24);
+						}catch(Exception e){
+							e.printStackTrace();
+						}	
+					}
+					
+					/*if the day is ahead for 5 days, we can see the material should be
+					 * transferred into the distributor, this the inventory products is increased
+					 * added before or added later
+					 */
+					
+					if(aheaddays>5){
+						double newinventory=InventoryProducts.get(InventoryProducts.indexOf((Product)plantmaterial)).getAmount()
+								+plantmaterial.getAmount();
+						InventoryProducts.get(InventoryProducts.
+								indexOf((Product)ordermaterial)).setAmount(newinventory);
+						//supply in and remove, but put the supply into zero is better
+						ConfirmOrders.get(j).getOrders().remove(plantmaterial);
+					}
+					//finished material getting.the left material will be used in the second stage 
+				
+				}
+				
+				
+				double leftinv=product.getAmount(); //当前库存当中可以用来向上游运输的
+				double testleft=leftinv-((Product)ordermaterial).getAmount(); //测试如果减去了需求以后还剩下多少，比如剩下0，200
+				double repmin=MaxCapProductType[product.materialtype]*safecoeff-testleft; //最小安全库存，比如200-200=0，200-(-50)=250,>0，说明不能满足,<0满足
+				double repmax=MaxCapProductType[product.materialtype]*maxcoeff-testleft;  //最大可存放库存，万一有其他物料到就没办法继续进厂了，可能有问题
+				
+				//不考虑这个月是否能够去补充上并且满足
+				//业务逻辑分离麻烦
+				//定量订货法，并且是需要补足剩下的物料, 上述的固定的库存被加上了
+				double realamount=0;//初始化,看是否能够满足物料运输的需求，分销商，在这一部分
+				if(repmin>0){
+					//不能满足如何返回,并且需要补充货物，并且
+					realamount=leftinv-MaxCapProductType[product.materialtype]*safecoeff; //实际能够满足的量
+					InventoryProducts.get(InventoryProducts.indexOf((Product)ordermaterial)).
+					setAmount(MaxCapProductType[product.materialtype]*safecoeff);//确定剩余的主要物料
+					//需要再进一步发送的信息，放入到原来的当中，并且返回
+					//设置返回的信息有点繁琐
+				}
+				else{
+					//能够满足的
+					realamount=leftinv-ordermaterial.getAmount(); //获得的是剩余的部分
+					InventoryProducts.get(InventoryProducts.indexOf((Product)ordermaterial)).
+					setAmount(MaxCapProductType[product.materialtype]*safecoeff); //设置相应的物料的内容
+				}
+				//剩余的部分是哪些
+				
+					
+				Product m=new Product();
+				m.setAmount(realamount);//realamount 指示的是实际存在的东西
+				m.materialtype=ordermaterial.materialtype;
+				m.setPrice(ordermaterial.getPrice());
+				//传值还是指向了同一个位置
+				Date a=new Date();
+				a=DemandOrders.get(i).getOrders().get(ordermaterial);
+				sendbackmaterial.put(m, a);
+				Message e=new Message();
+				e.setOrders(sendbackmaterial);
+				e.setSourceNode(this);
+				e.setTargetNode(DemandOrders.get(i).getTargetNode());
+				PurchaseOrders.add(e);
+					
+			}	
+		}
+	}
+	
+	
+    
+   //完成订购的时间计划之后，完成下游的订货计划
+	//已经完成了一部分的PurchaseOrders,根据上游的需求，下游本质上也是会发送固定的订单过来的和一般供应链，不同
+	//固有的订单应该如何体现？本身的帮助吗？，第一阶段规划
+	
+	//第一阶段规划，（考虑时间不一样，不考虑时间）
+	
+	//第二阶段规划
+	
+	public void planningSecondStage(){
+		//获得下游客户的订单,需求的量获得
+
+		
+		//供应的时间和MAP到达，是否还有持续时间啊？装卸能力？考虑的太多，目前只考虑补充完的时间
+	}
+	
+	
+	public ArrayList<Message> sendMessagePlants(){
+		return PurchaseOrders;	
+	}
+	
+	
+	
+	public void confirm(){
+		//确定下游发送过来的最终的量，但是也需要一个时间
+	}
+	
+	
+	public Date getCurrentDate() {
+		return currentDate;
+	}
+	
+	
+	//从外部父线程获取当前的时间
+	public void setCurrentDate(Date currentDate) {
+		this.currentDate = currentDate;
+	}
+	
+	public int[] getMaxCapProductType() {
+		return MaxCapProductType;
+	}
+	public void setMaxCapProductType(int[] maxCapProductType) {
+		MaxCapProductType = maxCapProductType;
+	}
+
+	
+	
+}

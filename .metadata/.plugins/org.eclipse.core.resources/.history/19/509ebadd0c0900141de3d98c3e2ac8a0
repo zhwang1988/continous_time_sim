@@ -1,0 +1,22 @@
+
+public class OilProductionSite extends Elements {
+    int Type=1;
+    double produceamount;
+    String Oiltype;
+    private String name;//定义为私有以便于调用增加节点
+    private double OilAmount;
+   
+	public String getName() {
+		return name;
+	}
+	
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public void oilProcure(){
+		
+	}
+	
+}

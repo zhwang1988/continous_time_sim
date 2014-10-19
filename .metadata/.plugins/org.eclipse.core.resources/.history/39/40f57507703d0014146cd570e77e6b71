@@ -1,0 +1,86 @@
+package SCMAgent;
+
+import java.util.*;
+import java.util.Map.Entry;
+
+public class ToolsClass {
+	
+	public static void main(String[] args){
+		
+		Map<SCMElements,Integer> Priority=new TreeMap<SCMElements, Integer>();
+		Map<SCMElements,Integer> Priority2=new TreeMap<SCMElements, Integer>();
+		
+		SCMElements Refinery1=new SCMElements("Refinery1");
+		//都是一样的equal 对象被覆盖了，都是一样的，产生了相同的hashcode
+		SCMElements Refinery2=new SCMElements("Refinery2");
+		SCMElements Refinery3=new SCMElements("Refinery3");
+		
+		SCMElements Refinery11=new SCMElements();
+		//都是一样的equal 对象被覆盖了，都是一样的，产生了相同的hashcode
+		Refinery11.setName("1");
+		SCMElements Refinery21=new SCMElements();
+		Refinery21.setName("1");
+		SCMElements Refinery31=new SCMElements();
+		Refinery31.setName("1");
+		
+		System.out.println(Refinery11.hashCode());
+		System.out.println(Refinery21.hashCode());
+		
+		
+		Priority2.put(Refinery11, 2);
+		Priority2.put(Refinery21, 1);
+		Priority2.put(Refinery31, 3);
+		
+		Priority.put(Refinery1, 2);
+		Priority.put(Refinery2, 1);
+		Priority.put(Refinery3, 3);
+		System.out.println(Priority2.size());
+		
+		
+		
+		
+	    for (Map.Entry<SCMElements,Integer> entry : Priority.entrySet()) {  
+	    	System.out.println(Priority.size());
+            System.out.println(entry.getKey() + " " + entry.getValue());  
+        } 
+	    
+	    
+		Map<SCMElements,Integer> resultMap = sortPriorityMapByValue(Priority); //按Value进行排序  
+	    for (Map.Entry<SCMElements,Integer> entry : resultMap.entrySet()) {  
+	            System.out.println(entry.getKey() + " " + entry.getValue());  
+	    }  
+		
+	}
+	
+	
+	
+	 public static Map<SCMElements, Integer> sortPriorityMapByValue(Map<SCMElements, Integer> map){  
+	        if (map == null || map.isEmpty()) {  
+	            return null;  
+	        }  
+	        Map<SCMElements, Integer> sortedMap = new LinkedHashMap<SCMElements, Integer>();  
+	        List<Map.Entry<SCMElements, Integer>> entryList = new ArrayList<Map.Entry<SCMElements, Integer>>(map.entrySet());  
+	        Collections.sort(entryList, new MapValueComparator());  
+	        Iterator<Map.Entry<SCMElements, Integer>> iter = entryList.iterator();  
+	        Map.Entry<SCMElements, Integer> tmpEntry = null;  
+	        while (iter.hasNext()) {  
+	            tmpEntry = iter.next();  
+	            sortedMap.put(tmpEntry.getKey(), tmpEntry.getValue());  
+	        }  
+	        return sortedMap;  
+	    }  
+}  
+
+	  
+	//比较器类  
+	class MapValueComparator implements Comparator<Map.Entry<SCMElements, Integer>> {  
+	    public int compare(Entry<SCMElements, Integer> me1, Entry<SCMElements, Integer> me2) {  
+	        return me1.getValue().compareTo(me2.getValue());  
+	    }
+
+	
+		
+	}
+	
+	
+

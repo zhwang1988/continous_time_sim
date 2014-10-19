@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Repast"/>
+	<classpathentry kind="lib" path="/Users/zhwang1988/Downloads/repast/repastj/repastj.jar"/>
+	<classpathentry kind="lib" path="/Users/zhwang1988/Downloads/repast/repastj/repastpy.jar"/>
+	<classpathentry kind="lib" path="/Users/zhwang1988/Downloads/repast/repastj/repastj-test.jar"/>
+	<classpathentry kind="lib" path="/Users/zhwang1988/Downloads/Repast-3.1/RepastJ/repast.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

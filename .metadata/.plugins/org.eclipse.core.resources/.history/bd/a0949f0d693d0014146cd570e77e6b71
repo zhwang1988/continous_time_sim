@@ -1,0 +1,57 @@
+package SCMAgent;
+
+import java.util.*;
+import java.util.Map.Entry;
+
+public class ToolsClass {
+	
+	public static void main(String[] args){
+		SCMElements Refinery1=new SCMElements();
+		SCMElements Refinery2=new SCMElements();
+		
+		Map<SCMElements,Integer> Priority=new TreeMap<SCMElements, Integer>();
+		Priority.put(Refinery1, 2);
+		Priority.put(Refinery2, 1);
+		
+	    for (Map.Entry<SCMElements,Integer> entry : Priority.entrySet()) {  
+            System.out.println(entry.getKey() + " " + entry.getValue());  
+    }  
+		Map<SCMElements,Integer> resultMap = sortPriorityMapByValue(Priority); //按Value进行排序  
+	    for (Map.Entry<SCMElements,Integer> entry : resultMap.entrySet()) {  
+	            System.out.println(entry.getKey() + " " + entry.getValue());  
+	    }  
+		
+	}
+	
+	
+	
+	 public static Map<SCMElements, Integer> sortPriorityMapByValue(Map<SCMElements, Integer> map){  
+	        if (map == null || map.isEmpty()) {  
+	            return null;  
+	        }  
+	        Map<SCMElements, Integer> sortedMap = new LinkedHashMap<SCMElements, Integer>();  
+	        List<Map.Entry<SCMElements, Integer>> entryList = new ArrayList<Map.Entry<SCMElements, Integer>>(map.entrySet());  
+	        Collections.sort(entryList, new MapValueComparator());  
+	        Iterator<Map.Entry<SCMElements, Integer>> iter = entryList.iterator();  
+	        Map.Entry<SCMElements, Integer> tmpEntry = null;  
+	        while (iter.hasNext()) {  
+	            tmpEntry = iter.next();  
+	            sortedMap.put(tmpEntry.getKey(), tmpEntry.getValue());  
+	        }  
+	        return sortedMap;  
+	    }  
+}  
+
+	  
+	//比较器类  
+	class MapValueComparator implements Comparator<Map.Entry<SCMElements, Integer>> {  
+	    public int compare(Entry<SCMElements, Integer> me1, Entry<SCMElements, Integer> me2) {  
+	        return me1.getValue().compareTo(me2.getValue());  
+	    }
+
+	
+		
+	}
+	
+	
+

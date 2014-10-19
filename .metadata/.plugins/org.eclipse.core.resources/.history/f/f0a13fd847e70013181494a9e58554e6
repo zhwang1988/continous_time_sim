@@ -1,0 +1,22 @@
+import java.io.FileNotFoundException;   
+import java.io.IOException;   
+import java.net.URISyntaxException;   
+  
+import org.apache.Hadoop.fs.FSDataInputStream;   
+import org.apache.hadoop.fs.FileContext;   
+import org.apache.hadoop.fs.Path;   
+import org.apache.hadoop.io.IOUtils;   
+import org.apache.hadoop.security.AccessControlException;   
+  
+public class Test {   
+    public static void main(String[] args) throws AccessControlException,   
+            FileNotFoundException, IOException, URISyntaxException {   
+        FileContext fc = FileContext   
+                .getFileContext();//如果运行在hadoop location中，不需要配置URI，否则需要给一个URI   
+        FSDataInputStream fsInput = fc.open(new Path(   
+                "/tmp/hadoop-alex/persons.rtf"));   
+        IOUtils.copyBytes(fsInput, System.out, 4090, false);   
+        fsInput.seek(0);   
+        IOUtils.copyBytes(fsInput, System.out, 4090, false);   
+    }   
+}  

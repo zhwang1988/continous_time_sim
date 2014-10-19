@@ -1,0 +1,9 @@
+package FPtree;
+
+public class FPTree {
+	
+	public static void getIniFrequentItem(){
+		
+	}
+
+}

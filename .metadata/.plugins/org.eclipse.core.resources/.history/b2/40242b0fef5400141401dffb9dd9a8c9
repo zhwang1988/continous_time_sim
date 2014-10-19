@@ -1,0 +1,18 @@
+package SCMAgent;
+
+public interface LogisticAgents {
+	//the property of the interface is static and public final
+	public static final int agenttype=1;
+	//every function here is public abstract and can be omitted 
+	public abstract double emissionFunction(double oilamount);
+	//every information from the market
+	void getMarketOrders();
+	
+	void getSpecificOrders();
+	
+	void bidfunction();
+	
+	void confirmOrders();
+	
+	
+}

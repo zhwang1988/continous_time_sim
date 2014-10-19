@@ -1,0 +1,42 @@
+package SCMAgent;
+
+
+interface TransAgents {
+	//the property of the interface is static and public final
+	public static final int agenttype=1;
+	//every function here is public abstract and can be omitted 
+	public abstract double emissionFunction(double oilamount);
+	//every information from the market
+	void getOrders();
+	
+	void confirmOrders();
+	
+}
+
+public interface LogisticAgents {
+	//the property of the interface is static and public final
+	public static final int agenttype=1;
+	//every function here is public abstract and can be omitted 
+	public abstract double emissionFunction(double oilamount);
+	//every information from the market
+	void getMarketOrders();
+	
+	void getSpecificOrders();
+	
+	void bidfunction();
+	
+	double sendbid();
+	
+	void confirmOrders();
+	
+}
+
+
+class pipeAgent extends SCMElements implements {
+
+	public pipeAgent(String name) {
+		super(name);
+		// TODO Auto-generated constructor stub
+	}
+	
+}

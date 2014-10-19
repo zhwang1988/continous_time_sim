@@ -1,0 +1,9 @@
+Unable to display model parameters
+java.lang.NullPointerException
+	at uchicago.src.sim.engine.Controller.addParamPanel(Unknown Source)
+	at uchicago.src.sim.engine.Controller.setupParamFrame(Unknown Source)
+	at uchicago.src.sim.engine.Controller.display(Unknown Source)
+	at uchicago.src.sim.engine.SimInit.load(Unknown Source)
+	at uchicago.src.sim.engine.SimInit.load(Unknown Source)
+	at uchicago.src.sim.engine.SimInit.loadModel(Unknown Source)
+	at Supplychain.SCMAgentsModel.main(SCMAgentsModel.java:105)

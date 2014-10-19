@@ -1,0 +1,248 @@
+package SCMAgent;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
+
+public class Distributor extends SCMElements {
+	
+	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");//时间的格式
+	
+	private Date currentDate;//用于定期订货法的时间参数，外部应该有仿真时间，可以获得外部的仿真时间，当这个仿真时间的time 到了
+	 
+	
+	private static final double safecoeff = 0.3;  //安全库存和估计量的初始设定
+	private static final double maxcoeff = 0.8;   //最大库存量的设计
+	ArrayList<Product> InventoryProducts;//库存商内部存在的库存和结构
+	ArrayList<Product> DemandProducts; //从外部从上游接收过来的需求
+	ArrayList<Material> SupplyMaterial; //下游的供应以及相应地订单，分销商记住也需要相应地利润
+	ArrayList<Product> OrderMaterial; //向下游的订单数量
+	ArrayList<Date> DemandProductsDate;
+	ArrayList<Date> SupplyMaterialDate;
+	ArrayList<Port> inports;  //输入和输出之间也需要有库存,是否要表明他可以向哪些地方供应或者？
+	ArrayList<Port> outports;	//输入和输出有库存
+	
+	
+	int SaleProductPrice[]; //卖的价格-所有产品
+	int PurchaseProductPrice[]; //买的价格-所有产品
+	
+	
+	/*some information above will not be used here*/
+	
+	int MaxCapProductType[];//用数组表示所有可能存放种类的最大值市场上有1-10种产品，0就表示不能存放该种物料,乙烯等
+	
+	ArrayList<Message> DemandOrders;  //上游订单信息，有不同的客户，优先级呢？
+	ArrayList<Message> PurchaseOrders; //下游的发送的货物
+	Map<SCMElements,Integer> DemandPriority;// 上游的priority 主要指客户
+	Map<SCMElements,Integer> PurchasePriority; //下游的priority 正好把所有的连接关系保存起来
+
+	
+	private double dieselprice1;
+	private double dieselprice0;
+	private double gasolineprice97;
+	private double gasolineprice93;
+	
+	private double locx;  //分销商的位置中心
+	private double locy;
+	
+	public Distributor(){
+		
+	}
+	//从数据库给出几个部分
+	public Distributor(ArrayList<Product> SaleProducts, int ProductType[]){
+		this.InventoryProducts=SaleProducts; //设定初始库存
+		this.MaxCapProductType=ProductType; //设定可以存放的最大量
+	}
+	
+	//分销商一开始需要估计下本期的库存，初始化库存，或者是上一周期的，或者进行核算，更应该是函数的外部给出的，不止这些
+	private void initializedata(){
+		//测试性质的初始化函数
+		double amountd0=getrandom(100,500);
+		Product d0=new Product("0号柴油",amountd0,dieselprice0,0,1);
+		InventoryProducts.add(d0);
+		
+		double amountd1=getrandom(100,500);
+		Product d1=new Product("1号柴油",amountd1,dieselprice1,1,1);
+		InventoryProducts.add(d1);
+		
+		double amountp97=getrandom(100,500);
+		Product p97=new Product("97号汽油",amountp97,gasolineprice97,97,2);
+		InventoryProducts.add(p97);
+		
+		double amountp93=getrandom(100,500);
+		Product p93=new Product("93号汽油",amountp93,gasolineprice93,93,2);
+		InventoryProducts.add(p93);
+		
+	}
+	
+	public void getMessagefromCustomer(Message e){
+		//放到相应地内容当中去,不如在这里就根据优先级来排序完毕最后获得各个的需求值
+		int size=DemandOrders.size(); //定义大小
+		Message last=DemandOrders.get(size);
+		if(size==0)
+		DemandOrders.add(e);
+		else
+		{	
+		int lastp=DemandPriority.get(DemandOrders.get(size).getSourceNode());//最后一个的优先级
+		int newp=DemandPriority.get(e.getSourceNode());//得到的是当前的SCM的节点，我需要判断他的优先级
+		if(lastp<newp)
+		{	
+			DemandOrders.remove(size);
+			DemandOrders.add(e);
+			DemandOrders.add(last);
+		}	
+		else
+		DemandOrders.add(e);
+		}		
+	}
+	
+	
+//在上游信息已知的情况下需要进行相应的规划
+	private void calplanning(){
+		//根据库存，上一期的情况和下一期的，预期的客户的订货量，一般是实际的客户需求，产生向下游发送的信息
+		//需要进一步的考虑优先级的问题，并且根据优先级来测试相关数据，看是否可行。
+		//按照顺序，处理订货量，以及订货的时间，第一轮设定都可以满足需求，先把一些当前库存量可以满足的需求满足了，留下残余的
+		//时间点又变成了调货，先不考虑时间，时间在logistic 运输考虑，先出货，后进货
+		
+	//监测库存？
+   //从处理客户优先级的订单开始
+		for(int i=0;i<DemandOrders.size();i++){
+			
+			//每一种物料
+			Iterator miterator=DemandOrders.get(i).orders.keySet().iterator();
+			
+			while(miterator.hasNext()){
+				Object key=miterator.next();//获取键值Material，选择
+				Product p=InventoryProducts.get(InventoryProducts.indexOf((Product)key)); //获取当前的所需物料
+				double leftinv=p.getAmount();
+				double testleft=leftinv-((Product) key).getAmount();
+				
+				double repmin=MaxCapProductType[p.materialtype]*safecoeff-testleft;
+				double repmax=MaxCapProductType[p.materialtype]*maxcoeff-testleft;
+				
+				//不考虑这个月是否能够去补充上并且满足
+				
+				//业务逻辑分离麻烦
+				//定量订货法，并且是需要补足剩下的物料
+				if(repmin>0){
+					//不能满足如何返回,并且需要补充货物
+					
+						
+				}
+				else{
+					
+				}
+					
+				
+				
+					
+			}	
+		}
+		
+		
+		
+		
+		
+		
+		for(int i=0;i<InventoryProducts.size();i++){
+			//判断应该是属于哪一种物料，根据物料的种类最后来判断应该补充多少原料吗？如何建立相关的机制？
+		
+			double leftinv=InventoryProducts.get(i).getAmount();
+			Product cpp=InventoryProducts.get(i);
+			
+			for(int j=0;j<DemandProducts.size();j++){
+				if(cpp.materialtype==DemandProducts.get(j).materialtype)
+					leftinv=InventoryProducts.get(i).getAmount()
+							-DemandProducts.get(j).getAmount();	
+			}
+			
+			//repmin可以认为是定量订货方法
+			double repmin=MaxCapProductType[InventoryProducts.get(i).materialtype]*safecoeff-leftinv;
+			double repmax=MaxCapProductType[InventoryProducts.get(i).materialtype]*maxcoeff-leftinv;	
+			
+			//定量订货法，并且，补充的物料在repmin-repmax之间，所以从本质上来看的话
+			if(repmin>0){
+				//是不是还要设置一个到货的时间？
+				cpp.setAmount(repmin); //进行设置进入所需的物料
+				OrderMaterial.add(cpp);//加入所需要的物料	, 完成设置发送的订单
+			}
+			else{
+				//定期订货法
+				getCurrentDate();
+				//判断是否到了时间，定期订货,货物的到达时间等相关的机制，目前的状况，订单的状况
+				double rep=purchasePlanning();
+				cpp.setAmount(repmin); //进行设置进入所需的物料
+				OrderMaterial.add(cpp);//加入所需要的物料, 完成设置发送的订单
+				
+			}
+			
+		}
+		
+
+	}
+    
+   
+	private double purchasePlanning(){
+		
+		double replenishamount=0;
+		return replenishamount;
+		//分销商需要计算自身在该周期的利润，来进行排产，要调用
+	}
+	
+	private void getMessageCustomer(Message e){
+		//获得上游客户的订单,如果强制类型转换,获得需求的信息，包括价格
+/*		for(int i=0;i<e.demandmaterial.size();i++){
+			this.DemandProducts.add((Product) e.demandmaterial.get(i));
+		}*/
+		
+	    //获得Map的值一样
+		Iterator MaterialIterator=e.orders.keySet().iterator();
+		while(MaterialIterator.hasNext()){
+			Object key=MaterialIterator.next();
+			//这么做的好处是之后处理时间和量可以分开考虑,或者暂时不考虑
+			this.DemandProducts.add((Product)key);
+			this.DemandProductsDate.add(e.orders.get(key));
+			//时间只是告诉运输商，能否在固定时间内
+		}
+		
+		
+		
+		
+		
+	}
+
+	private void getMessagePlants(Message e){
+		//获得下游客户的订单,需求的量获得
+
+		
+		//供应的时间和MAP到达，是否还有持续时间啊？装卸能力？考虑的太多，目前只考虑补充完的时间
+		
+		
+	}
+	
+	private ArrayList<Product> sendMessagePlants(){
+		return OrderMaterial;	
+	}
+	
+	
+	
+	private void confirm(){
+		//确定下游发送过来的最终的量，但是也需要一个时间
+	}
+	
+	
+	public Date getCurrentDate() {
+		return currentDate;
+	}
+	
+	
+	//从外部父线程获取当前的时间
+	public void setCurrentDate(Date currentDate) {
+		this.currentDate = currentDate;
+	}
+	
+	
+	
+}

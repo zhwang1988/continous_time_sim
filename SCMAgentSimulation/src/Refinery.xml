@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="RefineryBatis">
+
+	<resultMap id="RefineryResult" type="SCMAgent.Refinery">
+	<result property="RefineryId" column="idrefinery" jdbcType="INTEGER" javaType="int"/>
+	<result property="RefineryName" column="refineryName" jdbcType="VARCHAR" javaType="string"/>
+	<result property="RefineryType" column="refineryType" jdbcType="INTEGER" javaType="int"/>
+	<result property="RefineryCap" column="refineryCapactiy" jdbcType="DECIMAL" javaType="double"/>
+	</resultMap>
+
+
+	<select id="selecetRefinery" parameterType="int" resultMap="RefineryResult">
+		select * from Refinery where idrefinery=#{RefineryId}
+	</select>
+	
+	<select id="selectRefinerys" resultType="SCMAgent.RefineryBatis">
+		select * from Refinery
+	</select>
+	
+	<insert id="addRefinery" parameterType="SCMAgent.RefineryBatis">
+		insert into Refinery (idrefinery,refineryName,refineryType,refineryCapacity) values
+		(#{RefineryId}, #{RefineryName,jdbcType=VARCHAR}, #{RefineryType},#{RefineryCap});
+		<selectKey resultType="int" keyProperty="id">
+			SELECT LAST_INSERT_ID() AS VALUE
+		<!-- 这里需要说明一下不同的数据库主键的生成，对各自的数据库有不同的方式： -->
+		<!-- mysql:SELECT LAST_INSERT_ID() AS VALUE -->
+		<!-- mssql:select @@IDENTITY as value -->
+		<!-- oracle:SELECT STOCKIDSEQUENCE.NEXTVAL AS VALUE FROM DUAL -->
+		<!-- 还有一点需要注意的是不同的数据库生产商生成主键的方式不一样，有些是预先生成 (pre-generate)主键的，如Oracle和PostgreSQL。
+		有些是事后生成(post-generate)主键的，如MySQL和SQL Server 所以如果是Oracle数据库，则需要将selectKey写在insert之前 -->
+		</selectKey>
+	</insert>
+			
+</mapper>

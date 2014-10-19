@@ -1,0 +1,91 @@
+package testjava;
+import testjava.GenerateMap;
+import testjava.SimPerson;
+import java.util.ArrayList;
+
+public class runmap {
+	     
+	public static void main(String[] args) {
+		 
+		int fp=77; //火灾地点
+		GenerateMap gp=new GenerateMap();
+		Integer[][] dist0 =gp.gemap(); 
+		Integer[][] dist=gp.changemap(dist0,fp);//地图信息初始化
+		GenerateMap gp2=new GenerateMap();
+		Integer[][] dist1=gp2.changemap(dist0,fp);//地图信息初始化
+		gp.Initpeople(fp); //人员初始化
+		ArrayList<Integer[][]> list=gp.Fmap(dist); //计算最短路径信息，改变了dist
+		//gp.GetInformation(list,dist1,fp); //计算人，车路径时间，重叠时间
+//重新	   
+	   
+	   System.out.println("\n ----------------------------- \n");	
+	   ArrayList<SimPerson> allPerson=new ArrayList<SimPerson>();
+	   int count=gp.peoplelocation.length;
+	   //int count=1;
+	   Integer[] state=new Integer[count];
+	   for (int i=0;i<count;i++){
+		   int end;
+		   SimPerson one=new SimPerson(gp.peoplenumber[i],gp.peoplelocation[i]);
+		   allPerson.add(one);
+		   end=gp.getescapepoint(list, gp.peoplelocation[i], 41, 5);
+		   state[i]=1;//仿真未结束
+		   allPerson.get(i).initSimPerson(list, end);
+   
+	   }
+
+	   while (runmap.isRunning(state)){
+		   GenerateMap gp3=new GenerateMap();
+		   for (int i=0;i<count;i++){
+			   if(state[i]==1){
+				   	state[i]=allPerson.get(i).simnextstep(list);
+				   	//得到下一个点，从下一个点判断是否有冲突，修正冲突
+				   	gp3.peoplelocation[i]=allPerson.get(i).nextpoint;
+				   	gp3.peoplenumber[i]=gp.peoplenumber[i];
+			   }
+		   }
+		  // 得到新的问题
+			ArrayList<Integer[][]> list3=gp3.Fmap(dist); //计算最短路径信息，改变了dist
+           //下一个路径，假设人的速度也不一样了，所以说时间也不一样了，如何判断下面的点有可能会重复？
+		   //先算出来最短路径，那么下5秒8-12，那么速度就是1.6-2.4
+			//需要一个函数计算下，下面他们通过这些路口的时间点，是怎么样的，假设速度是2秒，那么计算出未来重复的路径是哪些
+			
+			//记录重复的人和路径，所有后面到的人换路径，最大人数，存储的是后到的
+			
+
+			
+			
+			
+			
+			
+		    
+		   for(int i=0;i<gp3.stm.size();i++){
+		
+				GenerateMap gp1=new GenerateMap();
+				Integer[][] omap=gp1.changemap(dist0,fp); //保存原始地图信息,指向了同一个对象
+			    //重新计算路径函数，保留,人员，地点,基本地图，重新得到最小路径和实际情况的输出
+			   	for(int j=0;j<20;j++){
+			   		gp1.peoplelocation[j]=gp3.peoplelocation[j];
+			   		gp1.peoplenumber[j]=gp3.peoplenumber[j];
+			   	}
+			   omap=gp.changepath(omap, gp3.stm.get(i).plabel , gp3.stm.get(i).st , gp3.stm.get(i).ds );
+			   
+			   ArrayList<Integer[][]> list1=gp1.Fmap(omap); //最短路径信息 
+			   gp1.display_path_s2d(list1, gp1.peoplelocation[gp3.stm.get(i).plabel], 41, 5);
+		   }     
+		   
+		   
+		   System.out.print("\n  ----");	
+	   }	
+	}
+	
+	
+
+	public static boolean isRunning(Integer[] state){
+		int length=state.length;
+		for(int i=0;i<length;i++){
+			if (state[i]==1)
+				return true;
+		}
+		return false;
+	}
+}

@@ -1,0 +1,78 @@
+package FPtree;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+public class FPTree {
+	private static final float SUPPORT = 0.6f;
+	private static long absSupport;
+	
+	public static Map<String,FPNode> getHeader(List<String[]> Matrix, Map<String, Integer>frequentMap){
+		
+		Map<String, Integer> countMap=new HashMap<String, Integer>();
+		
+		for (String[] line:Matrix){
+			for(String idName:line){
+				if (countMap.containsKey(idName)){
+					//利用container,重复值覆盖的特性
+					countMap.put(idName,countMap.get(idName)+1);
+				}
+				else{
+					countMap.put(idName, 1);
+				}
+			}
+		}
+		
+		//选择过滤到支持度的东西
+		for (Entry<String, Integer> entry: countMap.entrySet()){
+			if (entry.getValue()>=absSupport){
+				frequentMap.put(entry.getKey(), entry.getValue());	
+			}
+		}
+		
+		//现在需要进行下排序
+		List<Entry<String,Integer>> maplist=new ArrayList<Entry<String,Integer>>(frequentMap.entrySet());
+		
+		Collections.sort(maplist, new Comparator<Entry<String,Integer>>(){
+
+			@Override
+			public int compare(Entry<String, Integer> arg0,
+					Entry<String, Integer> arg1) {
+				// TODO Auto-generated method stub
+					return arg0.getValue()-arg1.getValue();
+			}
+			
+		});
+		frequentMap.clear();
+		//对这个Map有顺序的要求
+		Map<String,FPNode> header=new LinkedHashMap<String,FPNode>();
+		
+		for(Entry<String, Integer> entry: maplist){
+			header.put(entry.getKey(), null);
+			frequentMap.put(entry.getKey(), entry.getValue());
+		}
+		return header;
+		
+	}
+	
+	/*
+	 * 在FP的第二步当中，需要把header表当中的顺序，拿过来，根据第一频繁项集，重新排序并过滤
+	 */
+	public static String[] getOrderLine(String[] line, Map<String, Integer>frequentMap){
+		return line;
+	}
+	
+	public static String[] getOrderLine2(String[] line, Map<String,FPNode>header, Map<String, Integer>frequentMap){
+		return line;
+	}
+	
+	
+	
+
+}
